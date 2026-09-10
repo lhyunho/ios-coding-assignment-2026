@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct ProductAssignmentApp: App {
+    private let productService = ProductService()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ProductListView(service: productService)
         }
     }
 }
