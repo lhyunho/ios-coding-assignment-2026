@@ -4,31 +4,38 @@ import SwiftUI
 struct ProductRowView: View {
     let product: Product
     let isFavorite: Bool
+    let onSelectProduct: () -> Void
     let onToggleFavorite: () -> Void
 
     var body: some View {
         HStack(spacing: 16) {
-            thumbnail
-                .frame(width: 88, height: 88)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
-                .clipped()
+            Button(action: onSelectProduct) {
+                HStack(spacing: 16) {
+                    thumbnail
+                        .frame(width: 88, height: 88)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
+                        .clipped()
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(product.title ?? "상품명 없음")
-                    .font(.body)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(product.title ?? "상품명 없음")
+                            .font(.body)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                if let price = product.price {
-                    // API에 통화 정보가 없으므로 단위를 임의로 붙이지 않는다.
-                    Text("가격 \(price.formatted(.number.precision(.fractionLength(2))))")
-                        .font(.subheadline.weight(.semibold))
-                } else {
-                    Text("가격 정보 없음")
-                        .font(.subheadline.weight(.semibold))
+                        if let price = product.price {
+                            // API에 통화 정보가 없으므로 단위를 임의로 붙이지 않는다.
+                            Text("가격 \(price.formatted(.number.precision(.fractionLength(2))))")
+                                .font(.subheadline.weight(.semibold))
+                        } else {
+                            Text("가격 정보 없음")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .contentShape(Rectangle())
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .buttonStyle(.plain)
 
             Button(action: onToggleFavorite) {
                 Label(

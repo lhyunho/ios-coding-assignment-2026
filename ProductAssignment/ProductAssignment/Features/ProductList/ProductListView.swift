@@ -2,10 +2,13 @@ import SwiftUI
 
 struct ProductListView: View {
     @State private var viewModel: ProductListViewModel
+    @State private var selectedProductID: Int?
+    private let service: any ProductServicing
     let favoriteStore: FavoriteStore
 
     init(service: any ProductServicing, favoriteStore: FavoriteStore) {
         _viewModel = State(initialValue: ProductListViewModel(service: service))
+        self.service = service
         self.favoriteStore = favoriteStore
     }
 
@@ -13,6 +16,13 @@ struct ProductListView: View {
         NavigationStack {
             content
                 .navigationTitle("상품")
+                .navigationDestination(item: $selectedProductID) { productID in
+                    ProductDetailView(
+                        productID: productID,
+                        service: service,
+                        favoriteStore: favoriteStore
+                    )
+                }
                 .task {
                     await viewModel.load()
                 }
@@ -37,6 +47,7 @@ struct ProductListView: View {
                     ProductRowView(
                         product: product,
                         isFavorite: favoriteStore.isFavorite(product.id),
+                        onSelectProduct: { selectedProductID = product.id },
                         onToggleFavorite: { favoriteStore.toggle(product.id) }
                     )
                 }

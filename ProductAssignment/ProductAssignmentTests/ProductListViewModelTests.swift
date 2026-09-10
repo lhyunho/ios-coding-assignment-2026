@@ -7,7 +7,7 @@ struct ProductListViewModelTests {
     @Test func successfulLoadStoresProductsAndKeepsThem() async {
         // 준비: 서버 대신 정해진 상품을 반환한다.
         let service = StubProductService()
-        let products = [Product(id: 1, title: "상품", price: 10, thumbnail: nil)]
+        let products = [Product(id: 1, title: "상품", price: 10, thumbnail: nil, description: nil)]
         service.products = products
         let viewModel = ProductListViewModel(service: service)
 
@@ -49,7 +49,7 @@ struct ProductListViewModelTests {
 
         // 연결이 복구된 상황을 만든 뒤 다시 조회한다.
         service.error = nil
-        let products = [Product(id: 1, title: "상품", price: 10, thumbnail: nil)]
+        let products = [Product(id: 1, title: "상품", price: 10, thumbnail: nil, description: nil)]
         service.products = products
         await viewModel.load()
 
@@ -72,5 +72,13 @@ private final class StubProductService: ProductServicing {
             throw error
         }
         return products
+    }
+
+    @MainActor
+    func fetchProduct(id: Int) async throws -> Product {
+        guard let product = products.first(where: { $0.id == id }) else {
+            throw ProductServiceError.httpStatus(404)
+        }
+        return product
     }
 }
