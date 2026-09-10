@@ -2,9 +2,11 @@ import SwiftUI
 
 struct ProductListView: View {
     @State private var viewModel: ProductListViewModel
+    let favoriteStore: FavoriteStore
 
-    init(service: any ProductServicing) {
+    init(service: any ProductServicing, favoriteStore: FavoriteStore) {
         _viewModel = State(initialValue: ProductListViewModel(service: service))
+        self.favoriteStore = favoriteStore
     }
 
     var body: some View {
@@ -32,7 +34,11 @@ struct ProductListView: View {
                 )
             } else {
                 List(products) { product in
-                    ProductRowView(product: product)
+                    ProductRowView(
+                        product: product,
+                        isFavorite: favoriteStore.isFavorite(product.id),
+                        onToggleFavorite: { favoriteStore.toggle(product.id) }
+                    )
                 }
                 .listStyle(.plain)
             }

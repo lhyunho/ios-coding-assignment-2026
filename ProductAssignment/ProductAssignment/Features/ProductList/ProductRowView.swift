@@ -3,6 +3,8 @@ import SwiftUI
 
 struct ProductRowView: View {
     let product: Product
+    let isFavorite: Bool
+    let onToggleFavorite: () -> Void
 
     var body: some View {
         HStack(spacing: 16) {
@@ -27,6 +29,17 @@ struct ProductRowView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(action: onToggleFavorite) {
+                Label(
+                    isFavorite ? "찜 해제" : "찜하기",
+                    systemImage: isFavorite ? "heart.fill" : "heart"
+                )
+                .labelStyle(.iconOnly)
+                .foregroundStyle(isFavorite ? Color.red : Color.secondary)
+                .frame(width: 44, height: 44)
+            }
+            .buttonStyle(.borderless)
         }
         .padding(.vertical, 8)
     }

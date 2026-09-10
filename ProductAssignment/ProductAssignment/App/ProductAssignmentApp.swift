@@ -10,10 +10,11 @@ import SwiftUI
 @main
 struct ProductAssignmentApp: App {
     private let productService = ProductService()
+    @State private var favoriteStore = FavoriteStore()
 
     var body: some Scene {
         WindowGroup {
-            ProductListView(service: productService)
+            ProductListView(service: productService, favoriteStore: favoriteStore)
         }
     }
 }
