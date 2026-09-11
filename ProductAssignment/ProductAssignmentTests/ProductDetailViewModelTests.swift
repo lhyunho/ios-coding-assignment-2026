@@ -51,8 +51,8 @@ private final class StubProductDetailService: ProductServicing {
     var requestedIDs: [Int] = []
 
     @MainActor
-    func fetchProducts() async throws -> [Product] {
-        [product]
+    func fetchProducts(limit: Int, skip: Int) async throws -> ProductPage {
+        ProductPage(products: [product], total: 1, skip: skip)
     }
 
     @MainActor

@@ -5,8 +5,13 @@ import Observation
 @Observable
 final class ProductListViewModel {
     private(set) var state: ProductListState = .loading
+    private(set) var isLoadingNextPage = false
+    private(set) var nextPageError: String?
+    private(set) var hasMorePages = false
 
     private let service: any ProductServicing
+    private let pageSize = 30
+    private var nextSkip = 0
 
     init(service: any ProductServicing) {
         self.service = service
@@ -19,11 +24,44 @@ final class ProductListViewModel {
         state = .loading
 
         do {
-            let products = try await service.fetchProducts()
-            state = .loaded(products)
+            let page = try await service.fetchProducts(limit: pageSize, skip: 0)
+            updatePagination(with: page)
+            state = .loaded(page.products)
         } catch {
             state = .failed(message: Self.message(for: error))
         }
+    }
+
+    func loadNextPageIfNeeded(after productID: Int) async {
+        guard case .loaded(let products) = state,
+              products.last?.id == productID,
+              nextPageError == nil else { return }
+        await loadNextPage()
+    }
+
+    func loadNextPage() async {
+        guard case .loaded(let products) = state,
+              hasMorePages,
+              !isLoadingNextPage else { return }
+
+        isLoadingNextPage = true
+        nextPageError = nil
+        defer { isLoadingNextPage = false }
+
+        do {
+            let page = try await service.fetchProducts(limit: pageSize, skip: nextSkip)
+            updatePagination(with: page)
+            state = .loaded(products + page.products)
+        } catch {
+            // 추가 조회에 실패해도 이미 받은 목록과 다음 조회 위치는 유지한다.
+            nextPageError = Self.message(for: error)
+        }
+    }
+
+    private func updatePagination(with page: ProductPage) {
+        nextSkip = page.skip + page.products.count
+        // 빈 응답이면 같은 위치를 계속 요청하지 않는다.
+        hasMorePages = !page.products.isEmpty && nextSkip < page.total
     }
 
     private static func message(for error: any Error) -> String {

@@ -1,15 +1,15 @@
 import Foundation
 
 protocol ProductServicing {
-    func fetchProducts() async throws -> [Product]
+    func fetchProducts(limit: Int, skip: Int) async throws -> ProductPage
     func fetchProduct(id: Int) async throws -> Product
 }
 
 actor ProductService: ProductServicing {
-    func fetchProducts() async throws -> [Product] {
-        let url = URL(string: "https://dummyjson.com/products")!
+    func fetchProducts(limit: Int, skip: Int) async throws -> ProductPage {
+        let url = URL(string: "https://dummyjson.com/products?limit=\(limit)&skip=\(skip)")!
         let data = try await fetchData(from: url)
-        return try JSONDecoder().decode(ProductListResponse.self, from: data).products
+        return try JSONDecoder().decode(ProductPage.self, from: data)
     }
 
     func fetchProduct(id: Int) async throws -> Product {
@@ -36,8 +36,4 @@ actor ProductService: ProductServicing {
 enum ProductServiceError: Error {
     case invalidResponse
     case httpStatus(Int)
-}
-
-nonisolated private struct ProductListResponse: Decodable {
-    let products: [Product]
 }
