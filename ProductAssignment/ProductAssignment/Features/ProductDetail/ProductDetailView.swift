@@ -3,13 +3,15 @@ import SwiftUI
 struct ProductDetailView: View {
     @State private var viewModel: ProductDetailViewModel
     let favoriteStore: FavoriteStore
+    private let imageLoader: ImageLoader
 
-    init(productID: Int, service: any ProductServicing, favoriteStore: FavoriteStore) {
+    init(productID: Int, service: any ProductServicing, favoriteStore: FavoriteStore, imageLoader: ImageLoader) {
         _viewModel = State(initialValue: ProductDetailViewModel(
             productID: productID,
             service: service
         ))
         self.favoriteStore = favoriteStore
+        self.imageLoader = imageLoader
     }
 
     var body: some View {
@@ -50,7 +52,9 @@ struct ProductDetailView: View {
 
         return ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                productImage(url: product.thumbnail)
+                ProductImageView(url: product.thumbnail, imageLoader: imageLoader)
+                    .font(.largeTitle)
+                    .padding(16)
                     .frame(maxWidth: .infinity)
                     .frame(height: 280)
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
@@ -92,31 +96,5 @@ struct ProductDetailView: View {
             }
             .padding()
         }
-    }
-
-    @ViewBuilder
-    private func productImage(url: URL?) -> some View {
-        if let url {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                case .success(let image):
-                    image.resizable().scaledToFit().padding(16)
-                case .failure:
-                    imagePlaceholder
-                @unknown default:
-                    imagePlaceholder
-                }
-            }
-        } else {
-            imagePlaceholder
-        }
-    }
-
-    private var imagePlaceholder: some View {
-        Image(systemName: "photo")
-            .font(.largeTitle)
-            .foregroundStyle(.secondary)
     }
 }

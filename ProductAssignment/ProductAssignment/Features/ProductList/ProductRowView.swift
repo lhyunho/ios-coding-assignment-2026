@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ProductRowView: View {
     let product: Product
+    let imageLoader: ImageLoader
     let isFavorite: Bool
     let onSelectProduct: () -> Void
     let onToggleFavorite: () -> Void
@@ -11,7 +12,9 @@ struct ProductRowView: View {
         HStack(spacing: 16) {
             Button(action: onSelectProduct) {
                 HStack(spacing: 16) {
-                    thumbnail
+                    ProductImageView(url: product.thumbnail, imageLoader: imageLoader)
+                        .font(.title2)
+                        .padding(6)
                         .frame(width: 88, height: 88)
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
                         .clipped()
@@ -49,31 +52,5 @@ struct ProductRowView: View {
             .buttonStyle(.borderless)
         }
         .padding(.vertical, 8)
-    }
-
-    @ViewBuilder
-    private var thumbnail: some View {
-        if let url = product.thumbnail {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                case .success(let image):
-                    image.resizable().scaledToFit().padding(6)
-                case .failure:
-                    imagePlaceholder
-                @unknown default:
-                    imagePlaceholder
-                }
-            }
-        } else {
-            imagePlaceholder
-        }
-    }
-
-    private var imagePlaceholder: some View {
-        Image(systemName: "photo")
-            .font(.title2)
-            .foregroundStyle(.secondary)
     }
 }
